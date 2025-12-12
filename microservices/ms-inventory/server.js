@@ -30,7 +30,6 @@ app.get("/test", (req, res) => {
   res.json({ message: "Hello from D'Rafza Inventory Service!" });
 });
 
-// ✅ Start server
-app.listen(PORT, () => {
-  console.log(`✅ Inventory Service running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Inventory Service running on port ${PORT}`);
 });

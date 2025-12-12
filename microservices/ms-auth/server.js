@@ -22,6 +22,6 @@ app.get("/test", (req, res) => {
   res.json({ message: "Hello from D'Rafza Auth Service!" });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Auth Service running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Auth Service running on port ${PORT}`);
 });
