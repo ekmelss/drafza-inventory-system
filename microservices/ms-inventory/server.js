@@ -33,4 +33,4 @@ app.get("/test", (req, res) => {
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ Inventory Service running at http://localhost:${PORT}`);
-});c
+});
