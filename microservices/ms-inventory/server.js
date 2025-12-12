@@ -7,14 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/drafza_inventory";
 
-// ✅ Enable CORS (must come BEFORE routes)
-app.use(
-  cors({
-    origin: "http://localhost:3000", // your Next.js frontend
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+// ✅ Allow all origins for production
+app.use(cors());
 
 app.use(express.json());
 
@@ -25,9 +19,9 @@ app.use("/api/inventory", inventoryRoutes);
 const typeRoutes = require("./routes/typeRoutes");
 app.use("/api/types", typeRoutes);
 
-// ✅ Connect to MongoDB (REMOVED deprecated options)
+// ✅ Connect to MongoDB
 mongoose
-  .connect(MONGO_URI)  // ✅ Just pass the URI, no options needed
+  .connect(MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB (Inventory Service)"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -39,4 +33,4 @@ app.get("/test", (req, res) => {
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ Inventory Service running at http://localhost:${PORT}`);
-});
+});c
