@@ -190,7 +190,7 @@ export default function InventoryPage() {
 
       setProducts((prev) => [...prev, saved.item]);
       if (saved.updatedTypes) {
-        setTypes(saved.updatedTypes.map((t) => ({ id: t, type: t })));
+        setTypes(saved.updatedTypes.map((t: string) => ({ id: t, type: t })));
       }
       
       console.log("✅ Product added:", saved);
