@@ -7,7 +7,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(cors()); // ✅ Allow all origins for now
+app.use(cors({
+  origin: [
+    'http://localhost:3000', 
+    'https://your-app-name.vercel.app',
+    'https://*.vercel.app' // Allow all Vercel preview deployments
+  ],
+  credentials: true
+}));
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

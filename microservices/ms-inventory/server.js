@@ -8,7 +8,14 @@ const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/drafza_inventory";
 
 // ✅ Allow all origins for production
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://your-app-name.vercel.app',
+    'https://*.vercel.app'
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 
