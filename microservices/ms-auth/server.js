@@ -9,9 +9,9 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors({
   origin: [
-    'http://localhost:3000', 
-    'https://your-app-name.vercel.app',
-    'https://*.vercel.app' // Allow all Vercel preview deployments
+     "http://localhost:3000",
+      "https://drafza-inventory-system.vercel.app",
+      "https://drafza-inventory-system-git-main-ekmelss-projects.vercel.app"
   ],
   credentials: true
 }));

@@ -10,9 +10,9 @@ const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/drafza_inv
 // ✅ Allow all origins for production
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'https://your-app-name.vercel.app',
-    'https://*.vercel.app'
+    "http://localhost:3000",
+    "https://drafza-inventory-system.vercel.app",
+    "https://drafza-inventory-system-git-main-ekmelss-projects.vercel.app"
   ],
   credentials: true
 }));
