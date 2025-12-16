@@ -188,11 +188,7 @@ export default function InventoryPage() {
 
       const saved = await res.json();
 
-      setProducts((prev) => [...prev, saved.item]);
-      if (saved.updatedTypes) {
-        setTypes(saved.updatedTypes.map((t: string) => ({ id: t, type: t })));
-      }
-      
+      setProducts((prev) => [...prev, saved.item]);     
       console.log("✅ Product added:", saved);
 
       // ✅ Reset modal form
