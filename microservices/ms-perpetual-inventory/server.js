@@ -13,8 +13,7 @@ app.use(cors({
     "http://localhost:3000",
     "https://drafza-inventory-system.vercel.app",
     "https://drafza-inventory-system-git-main-ekmelss-projects.vercel.app",
-    // Add your custom Vercel domain if you have one
-    /\.vercel\.app$/  // This allows all Vercel preview deployments
+    /\.vercel\.app$/  // Allow all Vercel preview deployments
   ],
   credentials: true
 }));
