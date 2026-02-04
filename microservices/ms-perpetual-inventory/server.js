@@ -13,10 +13,14 @@ app.use(cors({
     "http://localhost:3000",
     "https://drafza-inventory-system.vercel.app",
     "https://drafza-inventory-system-git-main-ekmelss-projects.vercel.app",
-    /\.vercel\.app$/  // Allow all Vercel preview deployments
+    /\.vercel\.app$/
   ],
   credentials: true
 }));
+
+// ADD THESE TWO LINES:
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
