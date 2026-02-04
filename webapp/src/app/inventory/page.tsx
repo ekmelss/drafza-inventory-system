@@ -262,145 +262,152 @@ export default function InventoryPage() {
     <div className="bg-gray-50 min-h-screen text-gray-900">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-black to-gray-800 rounded-lg shadow text-white p-5">
-            <p className="text-sm">Total Items</p>
-            <p className="text-2xl font-bold">{totalItems}</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-black to-gray-800 rounded-lg shadow text-white p-4 sm:p-5">
+            <p className="text-xs sm:text-sm">Total Items</p>
+            <p className="text-xl sm:text-2xl font-bold">{totalItems}</p>
           </div>
-          <div className="bg-gradient-to-r from-red-700 to-red-600 rounded-lg shadow text-white p-5">
-            <p className="text-sm">Low Stock</p>
-            <p className="text-2xl font-bold">{lowStock}</p>
+          <div className="bg-gradient-to-r from-red-700 to-red-600 rounded-lg shadow text-white p-4 sm:p-5">
+            <p className="text-xs sm:text-sm">Low Stock</p>
+            <p className="text-xl sm:text-2xl font-bold">{lowStock}</p>
           </div>
-          <div className="bg-gradient-to-r from-red-900 to-black rounded-lg shadow text-white p-5">
-            <p className="text-sm">Out of Stock</p>
-            <p className="text-2xl font-bold">{outStock}</p>
+          <div className="bg-gradient-to-r from-red-900 to-black rounded-lg shadow text-white p-4 sm:p-5">
+            <p className="text-xs sm:text-sm">Out of Stock</p>
+            <p className="text-xl sm:text-2xl font-bold">{outStock}</p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900">Current Inventory</h2>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900">Current Inventory</h2>
 
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="border rounded-md px-3 py-1 text-sm"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button onClick={expandAll} className="px-3 py-1 bg-gray-200 text-sm rounded-md">
-                Expand All
-              </button>
-              <button onClick={collapseAll} className="px-3 py-1 bg-gray-200 text-sm rounded-md">
-                Collapse All
-              </button>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center px-3 py-1 bg-red-700 hover:bg-red-600 text-white text-sm rounded-md"
-              >
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add
-              </button>
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="border rounded-md px-3 py-1.5 text-sm flex-1 sm:flex-none min-w-[120px]"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <button onClick={expandAll} className="px-3 py-1.5 bg-gray-200 text-xs sm:text-sm rounded-md whitespace-nowrap">
+                  Expand All
+                </button>
+                <button onClick={collapseAll} className="px-3 py-1.5 bg-gray-200 text-xs sm:text-sm rounded-md whitespace-nowrap">
+                  Collapse All
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-xs sm:text-sm rounded-md whitespace-nowrap"
+                >
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  Add
+                </button>
+              </div>
             </div>
           </div>
 
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Size</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Stock</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Price</th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-100">
-              {Object.entries(grouped).length === 0 && (
+          {/* MOBILE SCROLL FIX: Wrap table in overflow-x-auto */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                    No products yet. Add your first product!
-                  </td>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Name</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Category</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Size</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Stock</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Price</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Actions</th>
                 </tr>
-              )}
+              </thead>
 
-              {Object.entries(grouped).map(([groupName, items]) => {
-                const visibleItems = items.filter((it) => filteredIds.has(it._id));
-                const isExpanded = !!expandedGroups[groupName];
+              <tbody className="bg-white divide-y divide-gray-100">
+                {Object.entries(grouped).length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 sm:px-6 py-4 text-center text-gray-500 text-sm">
+                      No products yet. Add your first product!
+                    </td>
+                  </tr>
+                )}
 
-                return (
-                  <React.Fragment key={groupName}>
-                    <tr className="bg-gradient-to-r from-amber-100 to-amber-50 cursor-pointer hover:from-amber-200 hover:to-amber-100" onClick={() => toggleGroup(groupName)}>
-                      <td colSpan={6} className="px-6 py-3 font-bold text-gray-900 flex items-center">
-                        <span className="mr-2 text-amber-700">{isExpanded ? "▼" : "▶"}</span>
-                        <span className="text-lg">{groupName}</span>
-                        <span className="ml-3 text-sm text-gray-600">({visibleItems.length} items)</span>
-                      </td>
-                    </tr>
+                {Object.entries(grouped).map(([groupName, items]) => {
+                  const visibleItems = items.filter((it) => filteredIds.has(it._id));
+                  const isExpanded = !!expandedGroups[groupName];
 
-                    {isExpanded &&
-                      visibleItems.map((item) => (
-                        <tr key={item._id} className="hover:bg-gray-50">
-                          <td className="px-6 py-3">
-                            <div className="font-medium text-gray-900">{getColorFromName(item.name)}</div>
-                            <div className="text-xs text-gray-500">{item.type}</div>
-                          </td>
-                          <td className="px-6 py-3 text-sm text-gray-700">{item.category}</td>
-                          <td className="px-6 py-3">
-                            <span className="inline-block px-2 py-1 bg-gray-200 rounded text-sm font-semibold">
-                              {item.size}
-                            </span>
-                          </td>
-                          <td className="px-6 py-3">
-                            <span
-                              className={
-                                item.stock === 0
-                                  ? "text-red-600 font-bold text-lg"
-                                  : item.stock <= item.lowStockThreshold
-                                  ? "text-orange-600 font-semibold text-lg"
-                                  : "text-green-600 font-semibold text-lg"
-                              }
-                            >
-                              {item.stock}
-                            </span>
-                          </td>
-                          <td className="px-6 py-3 font-semibold text-gray-900">RM {item.price.toFixed(2)}</td>
-                          <td className="px-6 py-3">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => openEditModal(item)}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  return (
+                    <React.Fragment key={groupName}>
+                      <tr className="bg-gradient-to-r from-amber-100 to-amber-50 cursor-pointer hover:from-amber-200 hover:to-amber-100" onClick={() => toggleGroup(groupName)}>
+                        <td colSpan={6} className="px-4 sm:px-6 py-3 font-bold text-gray-900">
+                          <div className="flex items-center">
+                            <span className="mr-2 text-amber-700 text-sm sm:text-base">{isExpanded ? "▼" : "▶"}</span>
+                            <span className="text-sm sm:text-lg">{groupName}</span>
+                            <span className="ml-3 text-xs sm:text-sm text-gray-600">({visibleItems.length} items)</span>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {isExpanded &&
+                        visibleItems.map((item) => (
+                          <tr key={item._id} className="hover:bg-gray-50">
+                            <td className="px-4 sm:px-6 py-3">
+                              <div className="font-medium text-gray-900 text-sm">{getColorFromName(item.name)}</div>
+                              <div className="text-xs text-gray-500">{item.type}</div>
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 text-xs sm:text-sm text-gray-700 whitespace-nowrap">{item.category}</td>
+                            <td className="px-4 sm:px-6 py-3">
+                              <span className="inline-block px-2 py-1 bg-gray-200 rounded text-xs font-semibold whitespace-nowrap">
+                                {item.size}
+                              </span>
+                            </td>
+                            <td className="px-4 sm:px-6 py-3">
+                              <span
+                                className={
+                                  item.stock === 0
+                                    ? "text-red-600 font-bold text-base sm:text-lg"
+                                    : item.stock <= item.lowStockThreshold
+                                    ? "text-orange-600 font-semibold text-base sm:text-lg"
+                                    : "text-green-600 font-semibold text-base sm:text-lg"
+                                }
                               >
-                                Edit Stock
-                              </button>
-                              <button
-                                onClick={() => openDeleteModal(item)}
-                                className="text-red-600 hover:text-red-800 text-sm font-medium"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                                {item.stock}
+                              </span>
+                            </td>
+                            <td className="px-4 sm:px-6 py-3 font-semibold text-gray-900 text-sm whitespace-nowrap">RM {item.price.toFixed(2)}</td>
+                            <td className="px-4 sm:px-6 py-3">
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <button
+                                  onClick={() => openEditModal(item)}
+                                  className="text-blue-600 hover:text-blue-800 text-xs font-medium whitespace-nowrap"
+                                >
+                                  Edit Stock
+                                </button>
+                                <button
+                                  onClick={() => openDeleteModal(item)}
+                                  className="text-red-600 hover:text-red-800 text-xs font-medium whitespace-nowrap"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
 
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full overflow-hidden">
-            <div className="px-6 py-4 border-b bg-red-700 text-white">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b bg-red-700 text-white sticky top-0">
               <h3 className="text-lg font-semibold">Add New Product</h3>
             </div>
 

@@ -22,15 +22,6 @@ type Sale = {
   soldBy: string;
 };
 
-type GroupedItem = {
-  type: string;
-  category: string;
-  size: string;
-  quantity: number;
-  unitPrice: number;
-  subtotal: number;
-};
-
 // Helper: Get shortcode for product type
 function getTypeShortcode(fullName: string): string {
   const typeName = fullName.split(" - ")[0] || fullName;
@@ -59,39 +50,16 @@ function getColor(fullName: string): string {
   return parts.length > 1 ? parts[1] : fullName;
 }
 
-// Group sales items by color
-function groupByColor(sales: Sale[]): Record<string, { items: GroupedItem[]; saleIds: string[] }> {
-  const grouped: Record<string, { items: GroupedItem[]; saleIds: string[] }> = {};
-  
-  sales.forEach(sale => {
-    sale.items.forEach(item => {
-      const color = getColor(item.productName);
-      const type = getTypeShortcode(item.productName);
-      const category = getCategoryShortcode(item.productName);
-      
-      if (!grouped[color]) {
-        grouped[color] = { items: [], saleIds: [] };
-      }
-      
-      if (!grouped[color].saleIds.includes(sale._id)) {
-        grouped[color].saleIds.push(sale._id);
-      }
-      
-      grouped[color].items.push({
-        type,
-        category,
-        size: item.size,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        subtotal: item.subtotal
-      });
-    });
-  });
-  
-  return grouped;
+// Helper: Get payment method shortcode
+function getPaymentShortcode(method: string): string {
+  const upper = method.toUpperCase();
+  if (upper === "CASH") return "CASH";
+  if (upper === "CARD") return "CARD";
+  if (upper === "ONLINE") return "QR";
+  return upper;
 }
 
-// Print Component
+// Print Component - NEW FORMAT: Per-Sale Listing
 const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date: string }) => {
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
   const totalDiscount = sales.reduce((sum, sale) => sum + sale.discount, 0);
@@ -104,8 +72,6 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
     acc[sale.paymentMethod] = (acc[sale.paymentMethod] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
-  const colorGroups = groupByColor(sales);
 
   return (
     <div className="print-container p-8 bg-white text-black" style={{ fontFamily: 'monospace' }}>
@@ -141,21 +107,42 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
         .print-subtitle {
           font-size: 12px;
         }
-        .color-group {
-          margin-bottom: 15px;
+        .sale-entry {
+          margin-bottom: 12px;
           page-break-inside: avoid;
+          border-left: 3px solid #000;
+          padding-left: 10px;
         }
-        .color-header {
+        .sale-header {
           font-weight: bold;
-          font-size: 13px;
-          margin-bottom: 5px;
-          border-bottom: 1px solid #000;
-          padding-bottom: 3px;
-        }
-        .item-row {
-          padding: 3px 0 3px 15px;
+          font-size: 12px;
+          margin-bottom: 4px;
           display: flex;
           justify-content: space-between;
+          align-items: center;
+        }
+        .sale-items {
+          margin-left: 15px;
+          margin-bottom: 4px;
+        }
+        .sale-item {
+          padding: 2px 0;
+        }
+        .sale-total {
+          font-weight: bold;
+          margin-left: 15px;
+          border-top: 1px solid #333;
+          padding-top: 4px;
+          display: flex;
+          justify-content: space-between;
+        }
+        .payment-badge {
+          display: inline-block;
+          padding: 2px 8px;
+          background: #f0f0f0;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
         }
         .print-summary {
           border-top: 2px solid #000;
@@ -175,23 +162,55 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
         <div className="print-subtitle">Daily Sales Report - {date}</div>
       </div>
 
-      {/* Sales grouped by color */}
+      {/* Sales listed per transaction */}
       <div style={{ marginBottom: '20px' }}>
-        {Object.entries(colorGroups).map(([color, data], idx) => (
-          <div key={color} className="color-group">
-            <div className="color-header">
-              {idx + 1}. {color}
+        {sales.map((sale, idx) => (
+          <div key={sale._id} className="sale-entry">
+            <div className="sale-header">
+              <span>
+                {idx + 1}. Sale #{sale.saleNumber.split('-').slice(-1)[0]}
+              </span>
+              <span className="payment-badge">
+                {getPaymentShortcode(sale.paymentMethod)}
+              </span>
             </div>
-            {data.items.map((item, itemIdx) => (
-              <div key={itemIdx} className="item-row">
-                <div>
-                  • {item.type}/{item.category} - Size {item.size} - Qty {item.quantity} - RM {item.unitPrice.toFixed(2)}
-                </div>
-                <div style={{ fontWeight: 'bold' }}>
-                  RM {item.subtotal.toFixed(2)}
-                </div>
+            
+            <div className="sale-items">
+              {sale.items.map((item, itemIdx) => {
+                const type = getTypeShortcode(item.productName);
+                const category = getCategoryShortcode(item.productName);
+                const color = getColor(item.productName);
+                
+                return (
+                  <div key={itemIdx} className="sale-item">
+                    {type}/{category} - {color} - Size {item.size} - Qty {item.quantity} - RM {item.unitPrice.toFixed(2)} = RM {item.subtotal.toFixed(2)}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="sale-total">
+              <span>SUBTOTAL:</span>
+              <span>RM {sale.subtotal.toFixed(2)}</span>
+            </div>
+            
+            {sale.discount > 0 && (
+              <div className="sale-total" style={{ color: '#c00' }}>
+                <span>DISCOUNT:</span>
+                <span>- RM {sale.discount.toFixed(2)}</span>
               </div>
-            ))}
+            )}
+            
+            <div className="sale-total" style={{ fontSize: '13px', marginTop: '4px' }}>
+              <span>TOTAL:</span>
+              <span>RM {sale.total.toFixed(2)}</span>
+            </div>
+            
+            {sale.notes && (
+              <div style={{ marginLeft: '15px', marginTop: '4px', fontSize: '10px', fontStyle: 'italic', color: '#666' }}>
+                Note: {sale.notes}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -201,10 +220,14 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
         <table style={{ width: '100%' }}>
           <tbody>
             <tr>
-              <td style={{ textAlign: 'right', paddingRight: '10px' }}>SUBTOTAL:</td>
+              <td style={{ textAlign: 'right', paddingRight: '10px' }}>TOTAL SALES:</td>
               <td style={{ textAlign: 'right', width: '100px' }}>
-                RM {sales.reduce((sum, s) => sum + s.subtotal, 0).toFixed(2)}
+                {sales.length} transactions
               </td>
+            </tr>
+            <tr>
+              <td style={{ textAlign: 'right', paddingRight: '10px' }}>TOTAL ITEMS SOLD:</td>
+              <td style={{ textAlign: 'right' }}>{totalItems} items</td>
             </tr>
             <tr>
               <td style={{ textAlign: 'right', paddingRight: '10px' }}>TOTAL DISCOUNT:</td>
@@ -212,7 +235,7 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
             </tr>
             <tr className="print-total-row">
               <td style={{ textAlign: 'right', paddingRight: '10px', borderTop: '2px solid #000', paddingTop: '5px' }}>
-                TOTAL SALES:
+                TOTAL REVENUE:
               </td>
               <td style={{ textAlign: 'right', borderTop: '2px solid #000', paddingTop: '5px' }}>
                 RM {totalRevenue.toFixed(2)}
@@ -222,14 +245,10 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
         </table>
 
         <div style={{ marginTop: '15px', paddingTop: '10px', borderTop: '1px solid #ccc' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-            <span>Total Transactions: {sales.length}</span>
-            <span>Items Sold: {totalItems}</span>
-          </div>
           <div>
             <strong>Payment Methods:</strong>{' '}
             {Object.entries(paymentBreakdown).map(([method, count]) => 
-              `${method.charAt(0).toUpperCase() + method.slice(1)} (${count})`
+              `${getPaymentShortcode(method)} (${count})`
             ).join(', ')}
           </div>
         </div>
@@ -242,7 +261,7 @@ const PrintDailySales = ({ sales, user, date }: { sales: Sale[]; user: any; date
 
       {/* Legend */}
       <div style={{ marginTop: '20px', fontSize: '10px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-        <strong>Legend:</strong> BK=Baju Kurung, J=Jubah, T=Telekung, BM=Baju Melayu | A=Adult, K=Kids
+        <strong>Legend:</strong> BK=Baju Kurung, BM=Baju Melayu, KT=Kurta, KB=Baju Kebarung, SP=Samping | A=Adult, K=Kids | QR=Online Transfer
       </div>
     </div>
   );
@@ -458,9 +477,12 @@ export default function ReportsPage() {
                           <p className="text-xs sm:text-sm text-gray-500 mt-1">
                             {new Date(sale.createdAt).toLocaleString()}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {sale.soldBy} | {sale.paymentMethod}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-gray-500">{sale.soldBy}</span>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                              {sale.paymentMethod.toUpperCase()}
+                            </span>
+                          </div>
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-bold text-base sm:text-lg text-red-700">
