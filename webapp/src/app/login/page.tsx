@@ -1,14 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Clear any corrupted localStorage on mount
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr === "undefined" || userStr === "null") {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
+    } catch (error) {
+      localStorage.clear();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,86 +32,107 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:5000'}/api/auth/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: name, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
-
+      
       if (!res.ok) {
-        throw new Error(data.message || "Invalid name or password.");
+        throw new Error(data.error || "Invalid credentials");
       }
 
-      // ✅ Store token
-      localStorage.setItem("token", data.token);
+      // Store token
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
-      localStorage.setItem("user", name);
+      // Store user object (make sure it exists and is valid)
+      if (data.user && typeof data.user === 'object') {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
-      // ✅ Redirect
+      console.log("✅ Login successful:", data.user);
+      
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      console.error("❌ Login error:", err);
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-md w-96"
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-stone-100 to-amber-100">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <h1 className="text-black text-center text-2xl font-semibold mb-6">D'RAFZA</h1>
+        <Card className="w-[380px] rounded-2xl shadow-xl border border-amber-200 bg-white/90 backdrop-blur">
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-serif tracking-wide text-amber-800">D'RAFZA</h1>
+              <p className="text-sm text-stone-500 mt-1">Perpetual Inventory System</p>
+            </div>
 
-        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+              >
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              </motion.div>
+            )}
 
-        <div className="relative mb-6">
-          <input
-            type="text"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-md p-3 outline-none focus:border-blue-600 peer"
-            placeholder=" "
-            required
-          />
-          <label
-            htmlFor="name"
-            className="absolute left-3 top-3 text-gray-500 bg-white px-1 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
-          >
-            Enter Name
-          </label>
-        </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm text-stone-600 mb-1">Username</label>
+                <input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="drafza1, drafza2, or drafza3"
+                  required
+                  autoFocus
+                />
+              </div>
 
-        <div className="relative mb-6">
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-md p-3 outline-none focus:border-blue-600 peer"
-            placeholder=" "
-            required
-          />
-          <label
-            htmlFor="password"
-            className="absolute left-3 top-3 text-gray-500 bg-white px-1 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
-          >
-            Enter Password
-          </label>
-        </div>
+              <div>
+                <label className="block text-sm text-stone-600 mb-1">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl border border-stone-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="🔐"
+                  required
+                />
+              </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-70"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-amber-700 hover:bg-amber-800 text-white tracking-wide py-3"
+              >
+                {loading ? "Authenticating…" : "Login"}
+              </Button>
+            </form>
+
+            <div className="mt-6 pt-4 border-t border-stone-200">
+              <div className="text-xs text-center text-stone-400 space-y-1">
+                <p>📍 Backend: {process.env.NEXT_PUBLIC_API_URL || "Not configured"}</p>
+                <p>Ramadan Season {new Date().getFullYear()}</p>
+                <p>© D'RAFZA · Traditional Clothing Store</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

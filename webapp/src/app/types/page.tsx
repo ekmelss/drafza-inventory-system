@@ -9,19 +9,22 @@ export default function ManageTypesPage() {
   const [newTypeName, setNewTypeName] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch all types (WITH TOKEN)
+  const getToken = () => localStorage.getItem("token");
+
+  // Fetch all types
   async function fetchTypes() {
     try {
-      const token = localStorage.getItem("token"); // ✅ GET TOKEN
+      const token = getToken();
       if (!token) {
         alert("You are not logged in. Please login again.");
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/types`, {
+      // Updated endpoint: /api/products/types/list
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/types/list`, {
         headers: { 
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // ✅ ADD TOKEN
+          Authorization: `Bearer ${token}`
         },
       });
 
@@ -35,23 +38,24 @@ export default function ManageTypesPage() {
     }
   }
 
-  // ✅ Add new type (WITH TOKEN)
+  // Add new type
   async function handleAddType(e: React.FormEvent) {
     e.preventDefault();
     if (!newTypeName.trim()) return;
 
     try {
-      const token = localStorage.getItem("token"); // ✅ GET TOKEN
+      const token = getToken();
       if (!token) {
         alert("You are not logged in. Please login again.");
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/types/add`, {
+      // Updated endpoint: /api/products/types/add
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/types/add`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // ✅ ADD TOKEN
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ type: newTypeName.trim() }),
       });
@@ -66,36 +70,39 @@ export default function ManageTypesPage() {
       setTypes((prev) => [...prev, saved]);
       setNewTypeName("");
 
-      localStorage.setItem("typesUpdated", Date.now().toString());
+      alert("Type added successfully!");
     } catch (err) {
       console.error("❌ Add type failed:", err);
+      alert("Error adding type. Check console.");
     }
   }
 
-  // ✅ Delete type (WITH TOKEN)
+  // Delete type
   async function handleDeleteType(id: string) {
     if (!confirm("Delete this type?")) return;
 
     try {
-      const token = localStorage.getItem("token"); // ✅ GET TOKEN
+      const token = getToken();
       if (!token) {
         alert("You are not logged in. Please login again.");
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/types/${id}`, {
+      // Updated endpoint: /api/products/types/:id
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/types/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}` // ✅ ADD TOKEN
+          Authorization: `Bearer ${token}`
         }
       });
 
       if (!res.ok) throw new Error("Failed to delete type");
       setTypes((prev) => prev.filter((t) => t._id !== id));
 
-      localStorage.setItem("typesUpdated", Date.now().toString());
+      alert("Type deleted successfully!");
     } catch (err) {
       console.error("❌ Delete type failed:", err);
+      alert("Error deleting type. Check console.");
     }
   }
 
@@ -116,34 +123,39 @@ export default function ManageTypesPage() {
           <input
             type="text"
             className="border rounded-md px-3 py-2 flex-1"
-            placeholder="Enter new type name (e.g. Baju Kurung)"
+            placeholder="Enter new type name (e.g. Baju Kurung, Jubah, Telekung)"
             value={newTypeName}
             onChange={(e) => setNewTypeName(e.target.value)}
             required
           />
           <button
             type="submit"
-            className="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+            className="bg-red-700 hover:bg-red-600 text-white px-6 py-2 rounded-md"
           >
-            Add
+            Add Type
           </button>
         </form>
 
         {loading ? (
           <p className="text-gray-500">Loading types...</p>
         ) : types.length === 0 ? (
-          <p className="text-gray-500">No types added yet.</p>
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500 mb-4">No types added yet.</p>
+            <p className="text-sm text-gray-400">
+              Add your first product type above (e.g., "Baju Kurung", "Jubah", "Telekung")
+            </p>
+          </div>
         ) : (
           <ul className="divide-y divide-gray-200 bg-white rounded-lg shadow">
             {types.map((t) => (
               <li
                 key={t._id}
-                className="flex justify-between items-center px-4 py-3"
+                className="flex justify-between items-center px-6 py-4 hover:bg-gray-50"
               >
-                <span className="text-gray-800">{t.type}</span>
+                <span className="text-gray-800 font-medium">{t.type}</span>
                 <button
                   onClick={() => handleDeleteType(t._id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-red-600 hover:text-red-800 text-sm font-medium"
                 >
                   Delete
                 </button>
